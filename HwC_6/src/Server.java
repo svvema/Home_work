@@ -21,7 +21,7 @@ public class Server {
             while (true)
             {
                 String str = sc.nextLine();
-                if (str.equals("end"))break;
+                if (str.equalsIgnoreCase("end"))break;
                 pw.println("echo: "+str);
                 pw.flush();
             }
