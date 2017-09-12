@@ -1,9 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Scanner;
@@ -12,21 +12,22 @@ public class MainWindow extends JFrame{
     private final String SERVER_ADDR = "localhost";
     private final int SERVER_PORT = 8189;
     private Socket socket;
-    private Scanner in;
-    private PrintWriter out;
     public static String name = "Anon";
     public static JTextArea jta;
     private JTextField jTextArea;
+    private DataInputStream in;
+    private DataOutputStream out;
+    private String hMes ="Type here your message..." ;
+
     public  MainWindow(){
 
         try {
             socket = new Socket(SERVER_ADDR,SERVER_PORT);
-            in = new Scanner(socket.getInputStream());
-            out = new PrintWriter(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         setTitle("Chat#1");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -36,7 +37,6 @@ public class MainWindow extends JFrame{
         setResizable(true);
         setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
 
-       // JTextArea jta = new JTextArea();
         jta = new JTextArea();
         jta.setEditable(false);
         jta.setLineWrap(true);
@@ -64,7 +64,7 @@ public class MainWindow extends JFrame{
         JButton jb = new JButton("Send");
         jb.setBackground(Color.green);
         jp2.add(jb,BorderLayout.EAST);
-        String hMes ="Type here your message..." ;
+
         jTextArea.setText(hMes);
 
         jTextArea.addMouseListener(new MouseAdapter() {
@@ -81,11 +81,8 @@ public class MainWindow extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 if (jTextArea.getText().equals(""))jta.append("Write something\n");else
                 if (!jTextArea.getText().equals(hMes)){
-//                jta.append(time()+ " " + name + ": " + jTextArea.getText() + "\n");
-//                jTextArea.setText("");
-               // jTextArea.setText(hMes);
                     sendMsg();
-                     }
+                }
             }
         });
 
@@ -94,14 +91,12 @@ public class MainWindow extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 if (jTextArea.getText().equals(hMes))jta.append("Write something\n");else
                 if (!jTextArea.getText().equals(hMes)){
-//                jta.append(time() + " " + name + ": " + jTextArea.getText() + "\n");
-//                jTextArea.setText("");
-     //          jTextArea.setText(hMes);
-                sendMsg();
+                    sendMsg();
                 }
                 jTextArea.grabFocus();
             }
         });
+
         jTextArea.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -116,36 +111,33 @@ public class MainWindow extends JFrame{
             }
         });
 
-        new Thread(new Runnable() {
+        Thread threadMessager = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+
                     while (true){
-                        if (in.hasNext()){
-                            String w = in.nextLine();
+                            String w = in.readUTF();
                             if (w.equalsIgnoreCase("end"))break;
-                            jta.append(w);
-                            jta.append("\n");
-                        }
+
+                            jta.append(w + "\n");
                     }
-                } catch (Exception e) {
+                }
+                catch (SocketException e){//here KOSTL
+                }
+                catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
+
+        threadMessager.start();
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                try {
-                    out.print("end");
-                    out.flush();
-                    socket.close();
-                    out.close();
-                    in.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
+                close();
+             //  threadMessager.stop();
             }
         });
 
@@ -166,6 +158,7 @@ public class MainWindow extends JFrame{
         mFileExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                close();
                 System.exit(0);
             }
         });
@@ -187,18 +180,33 @@ public class MainWindow extends JFrame{
         });
 
         setVisible(true);
-
-
-
     }
+
+
     public String time(){
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         return sdf.format(cal.getTime());
     }
     public void sendMsg(){
-        out.println(time() + " " + name + ": " + jTextArea.getText());
-        out.flush();
+        try {
+            out.writeUTF((time() + " " + name + ": " + jTextArea.getText()));
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         jTextArea.setText("");
+    }
+    public void close(){
+        try {
+            out.writeUTF("end");
+
+            out.flush();
+            socket.close();
+            out.close();
+            in.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
     }
 }
