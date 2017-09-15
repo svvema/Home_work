@@ -5,15 +5,19 @@ import java.util.Vector;
 
 public class Server {
     private final int PORT = 8189;
+    private ServerSocket server;
     private Vector<ClientHandler> clients;
-
+    private AuthService authService;
+    public AuthService getAuthService(){
+        return authService;
+    }
     public Server() {
-        ServerSocket server = null;
-        Socket socket = null;
-        clients = new Vector<>();
-
         try {
             server = new ServerSocket(PORT);
+            Socket socket = null;
+            authService = new BaseAuthService();
+            authService.start();
+            clients = new Vector<>();
             System.out.println("Server start");
             while (true){
                 socket = server.accept();
@@ -25,11 +29,11 @@ public class Server {
             System.out.println("Server init error");
         }finally {
             try {
-                socket.close();
                 server.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            authService.stop();
         }
     }
     public void broadcast(String message){
