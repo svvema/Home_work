@@ -2,10 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 
 public class NameWindow extends JFrame {
+public static JTextField jta;
     public NameWindow(){
+
         setTitle("Change name");
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -18,7 +21,7 @@ public class NameWindow extends JFrame {
 
         jp1.setLayout(new BorderLayout());
         jp1.setPreferredSize(new Dimension(400,50));
-        JTextField jta = new JTextField();
+        jta = new JTextField();
         jta.setFont(new Font("Courier New",Font.CENTER_BASELINE,16));
         jta.setBackground(new Color(255,153,102));
 
@@ -37,11 +40,8 @@ public class NameWindow extends JFrame {
         jta.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(jta.getText());
-                MainWindow.name = jta.getText();
-                MainWindow.jta.append("Your name now: " + MainWindow.name + "\n");
-                jta.setText("");
-                setVisible(false);
+                if (!jta.getText().equals(""))
+                    setName();
             }
         });
 
@@ -49,15 +49,23 @@ public class NameWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!jta.getText().equals(""))
-                MainWindow.name = jta.getText();
-                MainWindow.jta.append("Your name now: " + MainWindow.name + "\n");
-                jta.setText("");
-                setVisible(false);
-
+                setName();
             }
         });
 
         setVisible(true);
+
+    }
+    public void setName(){
+        MainWindow.name = jta.getText();
+        try {
+            MainWindow.out.writeUTF("/nick "+ MainWindow.name);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        MainWindow.jta.append("Your name now: " + MainWindow.name + "\n");
+        jta.setText("");
+        setVisible(false);
 
     }
 }

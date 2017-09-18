@@ -41,4 +41,14 @@ public class BaseAuthService implements AuthService {
     public void stop() {
 
     }
+//    @Override
+//
+//    public void setNick(String login, String pass, String nick) {
+//        for (Entry o : entries){
+//            if (o.login.equals(login) && o.pass.equals(pass)){
+//
+//            entries.set(entries.indexOf(o),new Entry(o.login,o.pass,nick));
+//            }
+//        }
+//    }
 }

@@ -28,7 +28,6 @@ public class ClientHandler {
                     if (str.startsWith("/auth")){
                         String[] parts = str.split(" ");
                         String nick = server.getAuthService().getNickByLoginPass(parts[1],parts[2]);
-                        System.out.println(nick);
                         if (nick!=null){
                             if (!server.isNickBusy(nick)){
                                 sendMessage("/authok " + nick);
@@ -44,8 +43,23 @@ public class ClientHandler {
                 while (true){
                     String str = in.readUTF();
                     if (str.equalsIgnoreCase("/end"))break;
-                    System.out.println(time() + " " +  "from " + name+ ": " + str);
-                    server.broadcast(time() + " " + name+ ": " + str);
+
+                    String oldName  = name;
+
+                    if (str.startsWith("/nick")){
+                        String[] parts = str.split(" ");
+                        String nick = parts[1];
+                        if (!server.isNickBusy(nick)){
+                            name = nick;
+                            str = "Change nick to: "+ name;
+                            server.broadcast(time() + " " + oldName + ": " + str);
+                            System.out.println(time() + " " +  "from " + oldName+ ": " + str);
+
+                        }
+
+                    }else
+
+                    server.broadcast(time() + " " + name + ": " + str);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

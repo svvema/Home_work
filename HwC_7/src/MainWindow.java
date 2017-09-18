@@ -13,12 +13,14 @@ public class MainWindow extends JFrame{
     private final String SERVER_ADDR = "localhost";
     private final int SERVER_PORT = 8189;
     public static String name = "Anon";
+    public static String login = "";
+    public static String password = "";
     public static JTextArea jta;
     private JTextField jTextArea, loginField, passField;
     private JPanel jp1,jp2, authPanel;
     private Socket socket;
     private DataInputStream in;
-    private DataOutputStream out;
+    public static DataOutputStream out;
     private String hMes ="Type here your message..." ;
     private boolean isAuthorized;
 
@@ -286,10 +288,12 @@ public class MainWindow extends JFrame{
     }
     public void loginSend(){
         try {
-            out.writeUTF("/auth "+ loginField.getText()+" "+ passField.getText());
+            out.writeUTF("/auth "+ loginField.getText() +" "+ passField.getText());
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        login = loginField.getText();
+        password = passField.getText();
 
     }
 }
