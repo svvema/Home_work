@@ -21,7 +21,8 @@ public class Server {
             System.out.println("Server start");
             while (true){
                 socket = server.accept();
-                subscribe(new ClientHandler(socket, this));
+                new ClientHandler(socket,this);
+                //subscribe(new ClientHandler(socket, this));
                 System.out.println("Client connected");
             }
         } catch (IOException e) {

@@ -12,14 +12,24 @@ import java.util.Calendar;
 public class MainWindow extends JFrame{
     private final String SERVER_ADDR = "localhost";
     private final int SERVER_PORT = 8189;
-    private Socket socket;
     public static String name = "Anon";
     public static JTextArea jta;
-    private JTextField jTextArea;
+    private JTextField jTextArea, loginField, passField;
+    private JPanel jp1,jp2, authPanel;
+    private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
     private String hMes ="Type here your message..." ;
+    private boolean isAuthorized;
 
+    public void setAuthorized(boolean authorized){
+        isAuthorized = authorized;
+
+        authPanel.setVisible(!isAuthorized);
+        jp2.setVisible(isAuthorized);
+        if  (isAuthorized)jTextArea.grabFocus();
+
+    }
     public  MainWindow(){
 
         try {
@@ -28,6 +38,7 @@ public class MainWindow extends JFrame{
             out = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
+            setAuthorized(false);
         }
 
         setTitle("Chat#1");
@@ -46,12 +57,12 @@ public class MainWindow extends JFrame{
 
         JScrollPane jsp = new JScrollPane(jta);
 
-        JPanel jp1 = new JPanel(new BorderLayout());
+        jp1 = new JPanel(new BorderLayout());
         add(jp1);
         jp1.setPreferredSize(new Dimension(280,450));
         jp1.add(jsp);
 
-        JPanel jp2 = new JPanel(new BorderLayout());
+        jp2 = new JPanel(new BorderLayout());
         add(jp2);
         jp2.setPreferredSize(new Dimension(300,50));
 
@@ -68,6 +79,36 @@ public class MainWindow extends JFrame{
 
         jTextArea.setText(hMes);
 
+        authPanel = new JPanel(new GridLayout(1,3));
+        loginField = new JTextField();
+        passField = new JPasswordField();
+        JButton jbAuth = new JButton("Login");
+        authPanel.add(loginField);
+        authPanel.add(passField);
+        authPanel.add(jbAuth);
+
+        add(authPanel, BorderLayout.SOUTH);
+
+        jbAuth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               loginSend();
+
+            }
+        });
+        loginField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginSend();
+            }
+        });
+        passField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginSend();
+            }
+        });
+
         jTextArea.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -76,6 +117,8 @@ public class MainWindow extends JFrame{
                 jTextArea.setText("");
             }
         });
+
+
 
         jTextArea.addActionListener(new ActionListener() {
             @Override
@@ -118,27 +161,51 @@ public class MainWindow extends JFrame{
                 try {
 
                     while (true){
-                            String w = in.readUTF();
-                            if (w.equalsIgnoreCase("end"))break;
+                            String msg = in.readUTF();
+                            if (msg.startsWith("/authok")){
+                                setAuthorized(true);
+                                jta.append("You login" + "\n");
 
-                            jta.append(w + "\n");
+                                break;
+                            }
+                            jta.append(msg + "\n");
+                            jta.setCaretPosition(jta.getDocument().getLength());
                     }
+                    while (true){
+
+                        String msg = in.readUTF();
+                        jta.append(msg + "\n");
+                        jta.setCaretPosition(jta.getDocument().getLength());}
+
+                }catch (SocketException e){
+                    System.out.println("Socket " + name + " closed");
                 }
-                catch (SocketException e){//here KOSTL
-                }
-                catch (Exception e) {
+                catch (IOException e){//here KOSTL
                     e.printStackTrace();
+                    setAuthorized(false);
+                }finally {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
 
         threadMessager.start();
+
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                close();
-             //  threadMessager.stop();
+                try {
+                    close();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    setAuthorized(false);
+                }
+                //  threadMessager.stop();
             }
         });
 
@@ -179,19 +246,25 @@ public class MainWindow extends JFrame{
                 nw.setVisible(true);else nw.setVisible(false);
             }
         });
-
+        setAuthorized(false);
         setVisible(true);
     }
 
+//    public void onAuthClick(){
+//        try{
+//            out.writeUTF("/auth " + loginField.getText() + passField.getText());
+//            loginField.clear;
+//            passField.clear;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//    }
 
-    public String time(){
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return sdf.format(cal.getTime());
-    }
+
     public void sendMsg(){
         try {
-            out.writeUTF((time() + " " + name + ": " + jTextArea.getText()));
+            out.writeUTF(jTextArea.getText());
+            jTextArea.setText("");
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -206,8 +279,17 @@ public class MainWindow extends JFrame{
             socket.close();
             out.close();
             in.close();
+
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+    }
+    public void loginSend(){
+        try {
+            out.writeUTF("/auth "+ loginField.getText()+" "+ passField.getText());
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
     }
 }

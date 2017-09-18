@@ -2,10 +2,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-/**
- * Created by Админ on 15.09.2017.
- */
 public class ClientHandler {
     private Socket socket;
     private Server server;
@@ -24,20 +23,35 @@ public class ClientHandler {
         }
         new Thread(() -> {
             try {
-//                while (true){
-//                    String str = in.readUTF();
-//
-//                }
+                while (true){//auth
+                    String str = in.readUTF();
+                    if (str.startsWith("/auth")){
+                        String[] parts = str.split(" ");
+                        String nick = server.getAuthService().getNickByLoginPass(parts[1],parts[2]);
+                        System.out.println(nick);
+                        if (nick!=null){
+                            if (!server.isNickBusy(nick)){
+                                sendMessage("/authok " + nick);
+                                name = nick;
+                                server.broadcast(time() + " " + name + " join to chat");
+                                server.subscribe(this);
+                                break;
+                            }else sendMessage("Account already in use");
+                        }else sendMessage("Wrong login or password");
+                    }
+
+                }
                 while (true){
                     String str = in.readUTF();
                     if (str.equalsIgnoreCase("/end"))break;
-                    System.out.println(" client: " + str);
-                    server.broadcast(str);
+                    System.out.println(time() + " " +  "from " + name+ ": " + str);
+                    server.broadcast(time() + " " + name+ ": " + str);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }finally {
                 server.unsubscribe(this);
+                server.broadcast(time() + " " + name + " left chat");
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -56,5 +70,10 @@ public class ClientHandler {
     }
     public String getName(){
         return name;
+    }
+    public String time(){
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(cal.getTime());
     }
 }
