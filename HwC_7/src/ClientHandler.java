@@ -23,47 +23,47 @@ public class ClientHandler {
         }
         new Thread(() -> {
             try {
-                while (true){//auth
+                while (true) {//auth
                     String str = in.readUTF();
-                    if (str.startsWith("/auth")){
+                    if (str.startsWith("/auth")) {
                         String[] parts = str.split(" ");
-                        String nick = server.getAuthService().getNickByLoginPass(parts[1],parts[2]);
-                        if (nick!=null){
-                            if (!server.isNickBusy(nick)){
+                        String nick = server.getAuthService().getNickByLoginPass(parts[1], parts[2]);
+                        if (nick != null) {
+                            if (!server.isNickBusy(nick)) {
                                 sendMessage("/authok " + nick);
                                 name = nick;
                                 server.broadcast(time() + " " + name + " join to chat");
                                 server.subscribe(this);
                                 break;
-                            }else sendMessage("Account already in use");
-                        }else sendMessage("Wrong login or password");
+                            } else sendMessage("Account already in use");
+                        } else sendMessage("Wrong login or password");
                     }
 
                 }
-                while (true){
+                while (true) {
                     String str = in.readUTF();
-                    if (str.equalsIgnoreCase("/end"))break;
+                    if (str.equalsIgnoreCase("/end")) break;
 
-                    String oldName  = name;
+                    String oldName = name;
 
-                    if (str.startsWith("/nick")){
+                    if (str.startsWith("/nick")) {
                         String[] parts = str.split(" ");
                         String nick = parts[1];
-                        if (!server.isNickBusy(nick)){
+                        if (!server.isNickBusy(nick)) {
                             name = nick;
-                            str = "Change nick to: "+ name;
+                            str = "Change nick to: " + name;
                             server.broadcast(time() + " " + oldName + ": " + str);
-                            System.out.println(time() + " " +  "from " + oldName+ ": " + str);
+                            System.out.println(time() + " " + "from " + oldName + ": " + str);
 
                         }
 
-                    }else
+                    } else
 
-                    server.broadcast(time() + " " + name + ": " + str);
+                        server.broadcast(time() + " " + name + ": " + str);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 server.unsubscribe(this);
                 server.broadcast(time() + " " + name + " left chat");
                 try {
@@ -74,7 +74,8 @@ public class ClientHandler {
             }
         }).start();
     }
-    public void sendMessage(String message){
+
+    public void sendMessage(String message) {
         try {
             out.writeUTF(message);
             out.flush();
@@ -82,10 +83,12 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-    public String getName(){
+
+    public String getName() {
         return name;
     }
-    public String time(){
+
+    public String time() {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         return sdf.format(cal.getTime());

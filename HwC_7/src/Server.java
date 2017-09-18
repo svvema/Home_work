@@ -8,9 +8,11 @@ public class Server {
     private ServerSocket server;
     private Vector<ClientHandler> clients;
     private AuthService authService;
-    public AuthService getAuthService(){
+
+    public AuthService getAuthService() {
         return authService;
     }
+
     public Server() {
         try {
             server = new ServerSocket(PORT);
@@ -19,16 +21,16 @@ public class Server {
             authService.start();
             clients = new Vector<>();
             System.out.println("Server start");
-            while (true){
+            while (true) {
                 socket = server.accept();
-                new ClientHandler(socket,this);
+                new ClientHandler(socket, this);
                 //subscribe(new ClientHandler(socket, this));
                 System.out.println("Client connected");
             }
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Server init error");
-        }finally {
+        } finally {
             try {
                 server.close();
             } catch (IOException e) {
@@ -37,17 +39,25 @@ public class Server {
             authService.stop();
         }
     }
-    public void broadcast(String message){
+
+    public void broadcast(String message) {
         for (ClientHandler c : clients) {
             c.sendMessage(message);
         }
     }
-    public boolean isNickBusy(String nick){
-        for (ClientHandler c : clients){
-            if (c.getName().equals(nick))return true;
+
+    public boolean isNickBusy(String nick) {
+        for (ClientHandler c : clients) {
+            if (c.getName().equals(nick)) return true;
         }
         return false;
     }
-    public void subscribe(ClientHandler c){clients.add(c);}
-    public void unsubscribe(ClientHandler c){clients.remove(c);}
+
+    public void subscribe(ClientHandler c) {
+        clients.add(c);
+    }
+
+    public void unsubscribe(ClientHandler c) {
+        clients.remove(c);
+    }
 }
