@@ -1,3 +1,5 @@
+package com.company.Client;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -6,8 +8,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class MainWindow extends JFrame {
     private final String SERVER_ADDR = "localhost";
@@ -16,6 +16,7 @@ public class MainWindow extends JFrame {
     public static String login = "";
     public static String password = "";
     public static JTextArea jta;
+    public static JTextField jtf;
     private JTextField jTextArea, loginField, passField;
     private JPanel jp1, jp2, authPanel;
     private Socket socket;
@@ -23,12 +24,15 @@ public class MainWindow extends JFrame {
     public static DataOutputStream out;
     private String hMes = "Type here your message...";
     private boolean isAuthorized;
+    private JTextArea jtaUsers;
+    private JScrollPane jspUsers;
 
     public void setAuthorized(boolean authorized) {
         isAuthorized = authorized;
 
         authPanel.setVisible(!isAuthorized);
         jp2.setVisible(isAuthorized);
+        jspUsers.setVisible(isAuthorized);
         if (isAuthorized) jTextArea.grabFocus();
 
     }
@@ -48,36 +52,45 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLocation(200, 200);
-        setSize(400, 600);
+        setBounds(400,300,400,600);
+        setMinimumSize(new Dimension(400,500));
         setResizable(true);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+      //  setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         jta = new JTextArea();
+        jtf = new JTextField();
         jta.setEditable(false);
         jta.setLineWrap(true);
         jta.setFont(new Font("Courier New", Font.CENTER_BASELINE, 16));
         jta.setBackground(new Color(255, 153, 102));
-
         JScrollPane jsp = new JScrollPane(jta);
 
-        jp1 = new JPanel(new BorderLayout());
-        add(jp1);
-        jp1.setPreferredSize(new Dimension(280, 450));
-        jp1.add(jsp);
+        jtaUsers = new JTextArea();
+        jtaUsers.setPreferredSize(new Dimension(70,1));
+        jtaUsers.setEditable(false);
+        jtaUsers.setLineWrap(true);
+        jspUsers = new JScrollPane(jtaUsers);
 
-        jp2 = new JPanel(new BorderLayout());
-        add(jp2);
-        jp2.setPreferredSize(new Dimension(300, 50));
+
+
+//        jp1 = new JPanel();
+//        jp1.setPreferredSize(new Dimension(280, 450));
+//        jp1.add(jsp);
+
+        jp2 = new JPanel();
+        jp2.setPreferredSize(new Dimension(330, 50));
+
 
         jTextArea = new JTextField();
         jTextArea.setFont(new Font("Courier New", Font.CENTER_BASELINE, 16));
         jTextArea.setBackground(new Color(204, 255, 153));
-
+        jTextArea.setPreferredSize(new Dimension(getWidth()-100,35));
         JScrollPane jspTextArea = new JScrollPane(jTextArea);
-        jp2.add(jspTextArea);
+        jp2.add(jspTextArea, BorderLayout.CENTER);
 
         JButton jb = new JButton("Send");
         jb.setBackground(Color.green);
+        jb.setPreferredSize(new Dimension(70,35));
         jp2.add(jb, BorderLayout.EAST);
 
         jTextArea.setText(hMes);
@@ -90,7 +103,11 @@ public class MainWindow extends JFrame {
         authPanel.add(passField);
         authPanel.add(jbAuth);
 
-        add(authPanel, BorderLayout.SOUTH);
+        add(authPanel, BorderLayout.NORTH);
+        add(jsp,BorderLayout.CENTER);
+        add(jp2,BorderLayout.SOUTH);
+
+        add(jspUsers, BorderLayout.EAST);
 
         jbAuth.addActionListener(new ActionListener() {
             @Override
@@ -165,19 +182,29 @@ public class MainWindow extends JFrame {
                     while (true) {
                         String msg = in.readUTF();
                         if (msg.startsWith("/authok")) {
-                            setAuthorized(true);
-                            jta.append("You login" + "\n");
 
+                            setAuthorized(true);
+                            jta.append("You login." + "\n");
                             break;
+                        }else if (!msg.startsWith("/userlist")) {
+                            jta.append(msg + "\n");
+                            jta.setCaretPosition(jta.getDocument().getLength());
                         }
-                        jta.append(msg + "\n");
-                        jta.setCaretPosition(jta.getDocument().getLength());
                     }
                     while (true) {
-
                         String msg = in.readUTF();
-                        jta.append(msg + "\n");
-                        jta.setCaretPosition(jta.getDocument().getLength());
+                        if (msg.startsWith("/")){
+                            if (msg.startsWith("/userlist")){
+                                String[] users = msg.split(" ");
+                                jtaUsers.setText("");
+                                for (int i=1; i<users.length;i++){
+                                    jtaUsers.append(users[i] + "\n");
+                                }
+                            }
+                        }else {
+                            jta.append(msg + "\n");
+                            jta.setCaretPosition(jta.getDocument().getLength());
+                        }
                     }
 
                 } catch (SocketException e) {

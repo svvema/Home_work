@@ -1,6 +1,5 @@
-/**
- * Created by Админ on 15.09.2017.
- */
+package com.company.server;
+
 public interface AuthService {
     void start();
 

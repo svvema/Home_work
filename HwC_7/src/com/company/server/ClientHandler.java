@@ -1,3 +1,5 @@
+package com.company.server;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -23,7 +25,8 @@ public class ClientHandler {
         }
         new Thread(() -> {
             try {
-                while (true) {//auth
+                //auth start
+                while (true) {
                     String str = in.readUTF();
                     if (str.startsWith("/auth")) {
                         String[] parts = str.split(" ");
@@ -37,15 +40,14 @@ public class ClientHandler {
                                 break;
                             } else sendMessage("Account already in use");
                         } else sendMessage("Wrong login or password");
-                    }
-
-                }
+                    }else sendMessage("Login please");
+                }//auth end
                 while (true) {
                     String str = in.readUTF();
                     if (str.equalsIgnoreCase("/end")) break;
 
+                    // nick change
                     String oldName = name;
-
                     if (str.startsWith("/nick")) {
                         String[] parts = str.split(" ");
                         String nick = parts[1];
@@ -53,12 +55,17 @@ public class ClientHandler {
                             name = nick;
                             str = "Change nick to: " + name;
                             server.broadcast(time() + " " + oldName + ": " + str);
+                            server.brodcastUserList();
                             System.out.println(time() + " " + "from " + oldName + ": " + str);
-
                         }
-
-                    } else
-
+                    }else
+                    // whisper
+                    if (str.startsWith("/w")){//w nick msg
+                        String[] parts = str.split(" ",3);
+                        String nameTo = parts[1];
+                        String msg = parts[2];
+                        server.sendMessageTo(this, nameTo,time() + " " + msg);
+                    }else
                         server.broadcast(time() + " " + name + ": " + str);
                 }
             } catch (IOException e) {
