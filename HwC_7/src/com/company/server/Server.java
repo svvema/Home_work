@@ -28,7 +28,7 @@ public class Server {
                 socket = server.accept();
                 new ClientHandler(socket, this);
                 //subscribe(new com.company.server.ClientHandler(socket, this));
-                System.out.println("Client connected");
+                System.out.println("Client open connection");
             }
         } catch (IOException e) {
             e.printStackTrace();

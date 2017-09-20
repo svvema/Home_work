@@ -39,14 +39,8 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
 
-        try {
-            socket = new Socket(SERVER_ADDR, SERVER_PORT);
-            in = new DataInputStream(socket.getInputStream());
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            setAuthorized(false);
-        }
+
+        connect();
 
         setTitle("Chat#1");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -173,56 +167,56 @@ public class MainWindow extends JFrame {
                     jTextArea.setText(hMes);
             }
         });
-
-        Thread threadMessager = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    while (true) {
-                        String msg = in.readUTF();
-                        if (msg.startsWith("/authok")) {
-
-                            setAuthorized(true);
-                            jta.append("You login." + "\n");
-                            break;
-                        }else if (!msg.startsWith("/userlist")) {
-                            jta.append(msg + "\n");
-                            jta.setCaretPosition(jta.getDocument().getLength());
-                        }
-                    }
-                    while (true) {
-                        String msg = in.readUTF();
-                        if (msg.startsWith("/")){
-                            if (msg.startsWith("/userlist")){
-                                String[] users = msg.split(" ");
-                                jtaUsers.setText("");
-                                for (int i=1; i<users.length;i++){
-                                    jtaUsers.append(users[i] + "\n");
-                                }
-                            }
-                        }else {
-                            jta.append(msg + "\n");
-                            jta.setCaretPosition(jta.getDocument().getLength());
-                        }
-                    }
-
-                } catch (SocketException e) {
-                    System.out.println("Socket " + name + " closed");
-                } catch (IOException e) {//here KOSTL
-                    e.printStackTrace();
-                    setAuthorized(false);
-                } finally {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        threadMessager.start();
+//
+//        Thread threadMessager = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//
+//                    while (true) {
+//                        String msg = in.readUTF();
+//                        if (msg.startsWith("/authok")) {
+//
+//                            setAuthorized(true);
+//                            jta.append("You login." + "\n");
+//                            break;
+//                        }else if (!msg.startsWith("/userlist")) {
+//                            jta.append(msg + "\n");
+//                            jta.setCaretPosition(jta.getDocument().getLength());
+//                        }
+//                    }
+//                    while (true) {
+//                        String msg = in.readUTF();
+//                        if (msg.startsWith("/")){
+//                            if (msg.startsWith("/userlist")){
+//                                String[] users = msg.split(" ");
+//                                jtaUsers.setText("");
+//                                for (int i=1; i<users.length;i++){
+//                                    jtaUsers.append(users[i] + "\n");
+//                                }
+//                            }
+//                        }else {
+//                            jta.append(msg + "\n");
+//                            jta.setCaretPosition(jta.getDocument().getLength());
+//                        }
+//                    }
+//
+//                } catch (SocketException e) {
+//                    System.out.println("Socket " + name + " closed");
+//                } catch (IOException e) {//here KOSTL
+//                    e.printStackTrace();
+//                    setAuthorized(false);
+//                } finally {
+//                    try {
+//                        socket.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+//
+//        threadMessager.start();
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -242,12 +236,14 @@ public class MainWindow extends JFrame {
         JMenu mFile = new JMenu("File");
         JMenu mEdit = new JMenu("Edit");
         JMenuItem mFileExit = new JMenuItem("Exit");
+        JMenuItem mFileReconnect = new JMenuItem("Reconnect");
         JMenuItem mEditClear = new JMenuItem("Clear");
         JMenuItem mEditName = new JMenuItem("Set Name");
         setJMenuBar(mainMenu);
         mainMenu.add(mFile);
 
         mainMenu.add(mEdit);
+        mFile.add(mFileReconnect);
         mFile.add(mFileExit);
         mEdit.add(mEditClear);
         mEdit.add(mEditName);
@@ -257,6 +253,12 @@ public class MainWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 close();
                 System.exit(0);
+            }
+        });
+        mFileReconnect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                connect();
             }
         });
 
@@ -314,5 +316,63 @@ public class MainWindow extends JFrame {
         login = loginField.getText();
         password = passField.getText();
 
+    }
+    public void connect(){
+        try {
+            socket = new Socket(SERVER_ADDR, SERVER_PORT);
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            setAuthorized(false);
+        }
+        Thread threadMessager = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    while (true) {
+                        String msg = in.readUTF();
+                        if (msg.startsWith("/authok")) {
+
+                            setAuthorized(true);
+                            jta.append("You login." + "\n");
+                            break;
+                        }else if (!msg.startsWith("/userlist")) {
+                            jta.append(msg + "\n");
+                            jta.setCaretPosition(jta.getDocument().getLength());
+                        }
+                    }
+                    while (true) {
+                        String msg = in.readUTF();
+                        if (msg.startsWith("/")){
+                            if (msg.startsWith("/userlist")){
+                                String[] users = msg.split(" ");
+                                jtaUsers.setText("");
+                                for (int i=1; i<users.length;i++){
+                                    jtaUsers.append(users[i] + "\n");
+                                }
+                            }
+                        }else {
+                            jta.append(msg + "\n");
+                            jta.setCaretPosition(jta.getDocument().getLength());
+                        }
+                    }
+
+                } catch (SocketException e) {
+                    System.out.println("Socket " + name + " closed");
+                } catch (IOException e) {//here KOSTL
+                    e.printStackTrace();
+                    setAuthorized(false);
+                } finally {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        threadMessager.start();
     }
 }
