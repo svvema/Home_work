@@ -61,8 +61,8 @@ public class Server {
     public void sendMessageTo(ClientHandler from, String to, String msg){
         for (ClientHandler c : clients) {
             if (c.getName().equalsIgnoreCase(to)){
-                c.sendMessage("from " + from.getName() + ": " + msg);
-                from.sendMessage("to " + to + " msg " + msg);
+                c.sendMessage(from.time()+ " from " + from.getName() + ": " + msg);
+                from.sendMessage(from.time()+ " to " + to + " msg " + msg);
                 break;
             }
         }
@@ -77,7 +77,7 @@ public class Server {
 
     public void subscribe(ClientHandler c) {
         clients.add(c);
-        brodcastUserList();
+ //       brodcastUserList();
     }
 
     public void unsubscribe(ClientHandler c) {

@@ -63,15 +63,16 @@ public class ClientHandler {
                             if (str.startsWith("/auth")) {
                                 String[] parts = str.split(" ");
                                 String nick = null;
-                                if (parts.length>1)
+                                if (parts.length==3)
                                 nick = server.getAuthService().getNickByLoginPass(parts[1], parts[2]);
 
                                 if (nick != null) {
                                     if (!server.isNickBusy(nick)) {
                                         sendMessage("/authok " + nick);
                                         name = nick;
-                                        server.broadcast(time() + " " + name + " join to chat");
                                         server.subscribe(this);
+                                        server.broadcast(time() + " " + name + " join to chat");
+                                        server.brodcastUserList();
                                         login = true;
                                         System.out.println("Client logged");
                                         timer.interrupt();
@@ -84,12 +85,13 @@ public class ClientHandler {
                     }//auth end
                     if (timeout) {
                         sendMessage("Time out! \nTry reconnect(File/reconnect)");
+                        sendMessage("/timeout");
                     Thread.currentThread().interrupt();
                         System.out.println("timeout");
                     }
 
                     while (true) {
-                        String str = null;
+                        String str = "Uknown";
                         try {
                             str = in.readUTF();
                             if (str.equalsIgnoreCase("/end")) break;
@@ -112,7 +114,7 @@ public class ClientHandler {
                                     String[] parts = str.split(" ", 3);
                                     String nameTo = parts[1];
                                     String msg = parts[2];
-                                    server.sendMessageTo(this, nameTo, time() + " " + msg);
+                                    server.sendMessageTo(this, nameTo, msg);
                                 } else
                                     server.broadcast(time() + " " + name + ": " + str);
                         } catch (EOFException e) {
@@ -128,6 +130,7 @@ public class ClientHandler {
                 e.printStackTrace();
             } finally {
                 server.unsubscribe(this);
+                if (name != null)
                 server.broadcast(time() + " " + name + " left chat");
                 try {
                     sendMessage("Something totally wrong");

@@ -10,7 +10,7 @@ import java.io.IOException;
 public class NameWindow extends JFrame {
     public static JTextField jta;
 
-    public NameWindow() {
+    public NameWindow(MainWindow mainWindow) {
 
         setTitle("Change name");
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
@@ -44,7 +44,7 @@ public class NameWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!jta.getText().equals(""))
-                    setName();
+                    setName(mainWindow);
             }
         });
 
@@ -52,7 +52,7 @@ public class NameWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!jta.getText().equals(""))
-                    setName();
+                    setName(mainWindow);
             }
         });
 
@@ -60,13 +60,16 @@ public class NameWindow extends JFrame {
 
     }
 
-    public void setName() {
+    public void setName(MainWindow mainWindow) {
         MainWindow.name = jta.getText();
         try {
             MainWindow.out.writeUTF("/nick " + MainWindow.name);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+
+
+        mainWindow.label.setText("Your name is "+ MainWindow.name);
         MainWindow.jta.append("Your name now: " + MainWindow.name + "\n");
         jta.setText("");
         setVisible(false);
