@@ -49,7 +49,8 @@ public class Server {
             c.sendMessage(message);
         }
     }
-    public void brodcastUserList(){
+
+    public void brodcastUserList() {
         StringBuffer sb = new StringBuffer("/userlist");
         for (ClientHandler c : clients) {
             sb.append(" " + c.getName());
@@ -58,11 +59,12 @@ public class Server {
             c.sendMessage(sb.toString());
         }
     }
-    public void sendMessageTo(ClientHandler from, String to, String msg){
+
+    public void sendMessageTo(ClientHandler from, String to, String msg) {
         for (ClientHandler c : clients) {
-            if (c.getName().equalsIgnoreCase(to)){
-                c.sendMessage(from.time()+ " from " + from.getName() + ": " + msg);
-                from.sendMessage(from.time()+ " to " + to + " msg " + msg);
+            if (c.getName().equalsIgnoreCase(to)) {
+                c.sendMessage(from.time() + " from " + from.getName() + ": " + msg);
+                from.sendMessage(from.time() + " to " + to + " msg " + msg);
                 break;
             }
         }
@@ -77,7 +79,7 @@ public class Server {
 
     public void subscribe(ClientHandler c) {
         clients.add(c);
- //       brodcastUserList();
+        //       brodcastUserList();
     }
 
     public void unsubscribe(ClientHandler c) {

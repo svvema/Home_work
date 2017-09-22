@@ -25,11 +25,11 @@ public class MainWindow extends JFrame {
     public static DataOutputStream out;
     private String hMes = "Type here your message...";
     private boolean isAuthorized;
-    //    private JTextArea jtaUsers;
     private JList jtaUsers;
     private JScrollPane jspUsers;
     private DefaultListModel<String> users = new DefaultListModel<>();
     public static Label label;
+    private JMenu mEdit;
 
     public void setAuthorized(boolean authorized) {
         isAuthorized = authorized;
@@ -37,13 +37,15 @@ public class MainWindow extends JFrame {
         authPanel.setVisible(!isAuthorized);
         jp2.setVisible(isAuthorized);
         jspUsers.setVisible(isAuthorized);
-        if  (isAuthorized)label.setVisible(true);else label.setVisible(false);
-        if (isAuthorized) jTextArea.grabFocus();
+        if (isAuthorized) label.setVisible(true);
+        else label.setVisible(false);
 
+        if (isAuthorized) jTextArea.grabFocus();
+        if (isAuthorized) mEdit.setVisible(true);
+        else mEdit.setVisible(false);
     }
 
     public MainWindow() {
-
 
         connect();
 
@@ -51,10 +53,9 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLocation(200, 200);
-        setBounds(400, 300, 400, 600);
-        setMinimumSize(new Dimension(400, 500));
+        setBounds(400, 300, 500, 600);
+        setMinimumSize(new Dimension(500, 500));
         setResizable(true);
-        //  setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         jta = new JTextArea();
         jtf = new JTextField();
@@ -64,35 +65,61 @@ public class MainWindow extends JFrame {
         jta.setBackground(new Color(255, 153, 102));
         JScrollPane jsp = new JScrollPane(jta);
 
-//        jtaUsers = new JTextArea();
-//        jtaUsers.setPreferredSize(new Dimension(70,1));
-//        jtaUsers.setEditable(false);
-//        jtaUsers.setLineWrap(true);
-//        jspUsers = new JScrollPane(jtaUsers);
-
         jtaUsers = new JList();
         jtaUsers.setModel(users);
-
-
         jspUsers = new JScrollPane(jtaUsers);
-        jspUsers.setPreferredSize(new Dimension(70, 1));
 
+        jp1 = new JPanel(new GridBagLayout());
 
-        jp2 = new JPanel();
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = 1;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+
+        jp1.add(jsp, c);
+
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridx = 1;
+        c.gridy = 0;
+        c.ipadx = 93;
+
+        jp1.add(jspUsers, c);
+
+        jp2 = new JPanel(new GridBagLayout());
         jp2.setPreferredSize(new Dimension(330, 50));
-
 
         jTextArea = new JTextField();
         jTextArea.setFont(new Font("Courier New", Font.CENTER_BASELINE, 16));
         jTextArea.setBackground(new Color(204, 255, 153));
-        jTextArea.setPreferredSize(new Dimension(getWidth() - 100, 35));
+
         JScrollPane jspTextArea = new JScrollPane(jTextArea);
-        jp2.add(jspTextArea, BorderLayout.CENTER);
 
         JButton jb = new JButton("Send");
         jb.setBackground(Color.green);
         jb.setPreferredSize(new Dimension(70, 35));
-        jp2.add(jb, BorderLayout.EAST);
+
+        c.gridwidth = 1;
+        c.weightx = .8;
+        c.weighty = .2;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.ipady = 40;
+        c.ipadx = 280;
+
+        jp2.add(jspTextArea, c);
+
+        c.gridwidth = 1;
+        c.weightx = 0;
+
+        c.gridx = 1;
+        c.gridy = 0;
+        c.ipadx = 50;
+
+        jp2.add(jb, c);
 
         jTextArea.setText(hMes);
 
@@ -105,10 +132,9 @@ public class MainWindow extends JFrame {
         authPanel.add(jbAuth);
 
         add(authPanel, BorderLayout.NORTH);
-        add(jsp, BorderLayout.CENTER);
-        add(jp2, BorderLayout.SOUTH);
+        add(jp1, BorderLayout.CENTER);
 
-        add(jspUsers, BorderLayout.EAST);
+        add(jp2, BorderLayout.SOUTH);
 
         jbAuth.addActionListener(new ActionListener() {
             @Override
@@ -138,7 +164,6 @@ public class MainWindow extends JFrame {
                     jTextArea.setText("");
             }
         });
-
 
         jTextArea.addActionListener(new ActionListener() {
             @Override
@@ -175,7 +200,6 @@ public class MainWindow extends JFrame {
             }
         });
 
-
         DefaultListSelectionModel m = new DefaultListSelectionModel();
         m.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m.setLeadAnchorNotificationEnabled(false);
@@ -191,15 +215,6 @@ public class MainWindow extends JFrame {
                 jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
             }
         });
-//        jtaUsers.addListSelectionListener(new ListSelectionListener() {
-//            @Override
-//            public void valueChanged(ListSelectionEvent e) {
-//
-//                int selected = jtaUsers.getSelectedIndex();
-//                System.out.println(jtaUsers.getModel().getElementAt(selected));
-//            }
-//        });
-
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -211,27 +226,24 @@ public class MainWindow extends JFrame {
                     e1.printStackTrace();
                     setAuthorized(false);
                 }
-                //  threadMessager.stop();
             }
         });
 
         JMenuBar mainMenu = new JMenuBar();
         JMenu mFile = new JMenu("File");
-        JMenu mEdit = new JMenu("Edit");
+        mEdit = new JMenu("Edit");
         JMenuItem mFileExit = new JMenuItem("Exit");
         JMenuItem mFileReconnect = new JMenuItem("Reconnect");
         JMenuItem mEditClear = new JMenuItem("Clear");
         JMenuItem mEditName = new JMenuItem("Set Name");
         setJMenuBar(mainMenu);
-        label = new Label("Your name is "+name);
+        label = new Label("Your name is " + name);
         Label separator = new Label("");
-        separator.setPreferredSize(new Dimension(200,1));
+        separator.setPreferredSize(new Dimension(200, 1));
         mainMenu.add(mFile);
         mainMenu.add(mEdit);
         mainMenu.add(separator);
         mainMenu.add(label);
-//        label.setVisible(false);
-
         mFile.add(mFileReconnect);
         mFile.add(mFileExit);
         mEdit.add(mEditClear);
@@ -247,6 +259,7 @@ public class MainWindow extends JFrame {
         mFileReconnect.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                jta.setText("");
                 setAuthorized(false);
                 close();
                 connect();
@@ -329,17 +342,18 @@ public class MainWindow extends JFrame {
                     while (true) {
                         String msg = in.readUTF();
                         if (msg.startsWith("/timeout")) {
+                            out.writeUTF(" ");
                             close();
                             break;
                         }
                         if (msg.startsWith("/authok")) {
                             String[] authmsg = msg.split(" ");
                             name = authmsg[1];
-                            label.setText("Your name is "+name);
+                            label.setText("Your name is " + name);
                             setAuthorized(true);
                             jta.setText("");
                             jta.append("You login as " + name + "\n");
-                            
+
 
                             break;
                         } else if (!msg.startsWith("/userlist")) {
