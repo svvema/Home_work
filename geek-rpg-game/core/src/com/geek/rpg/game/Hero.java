@@ -7,6 +7,8 @@ import com.badlogic.gdx.math.Vector2;
 public class Hero extends AbstractUnit {
     public Hero() {
         this.texture = new Texture("charTank.tga");
+        this.textureHP = new Texture("hp.png");
+
         this.name = "Alexander";
         this.maxHp = 100;
         this.hp = this.maxHp;

@@ -34,7 +34,9 @@ public class RpgGame extends ApplicationAdapter {
         batch.begin();
         background.render(batch);
         hero.render(batch);
+        hero.renderHP(batch);
         monster.render(batch);
+        monster.renderHP(batch);
         batch.end();
     }
 

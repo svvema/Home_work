@@ -7,6 +7,8 @@ import com.badlogic.gdx.math.Vector2;
 
 public abstract class AbstractUnit {
     protected Texture texture;
+    protected Texture textureHP;
+
     protected String name;
     protected int hp;
     protected int maxHp;
@@ -53,6 +55,18 @@ public abstract class AbstractUnit {
         if (flip) dx *= -1;
         batch.draw(texture, position.x + dx, position.y, 0, 0, texture.getWidth(), texture.getHeight(), 1, 1, 0, 0, 0, texture.getWidth(), texture.getHeight(), flip, false);
         batch.setColor(1f, 1f, 1f, 1f);
+    }
+    public void renderHP(SpriteBatch batch){
+        float dam=0;
+        if (takeDamageAction > 0) {
+
+        }
+        float dx = (50f * (float) Math.sin((1f - attackAction) * 3.14f));
+        if (flip) dx *= -1;
+        System.out.println(dx);
+        batch.draw(textureHP,position.x+dx, position.y+texture.getHeight(),0,0,textureHP.getWidth(),textureHP.getHeight(),(float)maxHp/(float)hp,1f,0,0,0,textureHP.getWidth(),textureHP.getHeight(),flip,false);
+        batch.setColor(1f, 1f, 1f, 1f);
+
     }
 
     public void update(float dt) {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Monster extends AbstractUnit {
     public Monster() {
         this.texture = new Texture("charSkeleton.tga");
+        this.textureHP = new Texture("hp.png");
         this.name = "Skelet";
         this.maxHp = 10;
         this.hp = this.maxHp;
