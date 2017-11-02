@@ -9,11 +9,11 @@ public class Monster extends AbstractUnit {
         this.texture = new Texture("charSkeleton.tga");
         this.textureHP = new Texture("hp.png");
         this.name = "Skelet";
-        this.maxHp = 10;
+        this.maxHp = 15;
         this.hp = this.maxHp;
         this.level = 1;
-        this.strength = 5;
-        this.dexterity = 5;
+        this.strength = 8;
+        this.dexterity = 50;
         this.endurance = 5;
         this.spellpower = 0;
         this.defence = 1;
